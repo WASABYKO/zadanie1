@@ -55,9 +55,5 @@ double getB(const double x, const double y)
     // Используем тригонометрическое тождество: sin²x + cos²y
     // Но по заданию, вероятно, имеется в виду: x * (sin²x + cos²y)
     
-    double sin_x = sin(x);
-    double cos_y = cos(y);
     
-    double result = x * (sin_x * sin_x + cos_y * cos_y);
-    return result;
 }
