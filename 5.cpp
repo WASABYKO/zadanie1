@@ -1,99 +1,94 @@
 #include <iostream>
-#include <cmath>
-#include <iomanip>
+#include <cstdlib>
+#include <ctime>
 #include <limits>
 using namespace std;
 
+const int SIZE = 7; // Размер массива
+
 /**
- * @brief Вычисление факториала числа (итеративный метод)
- * @param n число для вычисления факториала
- * @return факториал числа n
+ * @brief Заполнение массива случайными числами в диапазоне [-10; 20]
+ * @param arr массив для заполнения
  */
-unsigned long long factorial(int n) {
-    if (n < 0) return 0;
-    unsigned long long result = 1;
-    for (int i = 2; i <= n; ++i) {
-        result *= i;
+void fillArrayRandom(int arr[]) {
+    srand(time(0)); // Инициализация генератора случайных чисел
+    for (int i = 0; i < SIZE; i++) {
+        arr[i] = rand() % 31 - 10; // [-10; 20]
     }
-    return result;
 }
 
 /**
- * @brief Вычисление суммы первых n членов последовательности
- * @param n количество членов последовательности
- * @return сумма первых n членов
+ * @brief Заполнение массива вручную с клавиатуры
+ * @param arr массив для заполнения
  */
-double sumFirstNTerms(int n) {
-    double sum = 0.0;
-    for (int k = 0; k <= n; ++k) {
-        sum += pow(-1, k) / factorial(k);
+void fillArrayManual(int arr[]) {
+    cout << "Введите " << SIZE << " целых чисел:" << endl;
+    for (int i = 0; i < SIZE; i++) {
+        cout << "Элемент [" << i << "]: ";
+        while (!(cin >> arr[i])) {
+            cout << "Ошибка! Введите целое число: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    }
+}
+
+/**
+ * @brief Вывод массива на экран
+ * @param arr массив для вывода
+ * @param title заголовок для вывода
+ */
+void printArray(const int arr[], const string& title) {
+    cout << title << ": [";
+    for (int i = 0; i < SIZE; i++) {
+        cout << arr[i];
+        if (i < SIZE - 1) cout << ", ";
+    }
+    cout << "]" << endl;
+}
+
+/**
+ * @brief Найти сумму элементов с нечетными индексами
+ * @param arr массив для обработки
+ * @return сумма элементов с нечетными индексами
+ */
+int sumOddIndexElements(const int arr[]) {
+    int sum = 0;
+    for (int i = 1; i < SIZE; i += 2) { // Индексы 1, 3, 5...
+        sum += arr[i];
     }
     return sum;
 }
 
 /**
- * @brief Вычисление суммы членов последовательности, не меньших по модулю e
- * @param e минимальное значение члена последовательности по модулю
- * @return сумма подходящих членов последовательности
+ * @brief Подсчет элементов > A и кратных 5
+ * @param arr массив для обработки
+ * @param A заданное число для сравнения
+ * @return количество элементов, удовлетворяющих условиям
  */
-double sumTermsAboveE(double e) {
-    double sum = 0.0;
-    double term;
-    int k = 0;
-    
-    do {
-        term = pow(-1, k) / factorial(k);
-        if (abs(term) >= e) {
-            sum += term;
+int countElementsGreaterThanAAndMultipleOf5(const int arr[], int A) {
+    int count = 0;
+    for (int i = 0; i < SIZE; i++) {
+        if (arr[i] > A && arr[i] % 5 == 0) {
+            count++;
         }
-        k++;
-    } while (abs(term) >= e || k < 10); // Добавляем условие k < 10 для предотвращения бесконечного цикла
-    
-    return sum;
+    }
+    return count;
 }
 
 /**
- * @brief Функция для безопасного ввода целого числа с проверкой
- * @param prompt приглашение для ввода
- * @param minValue минимальное допустимое значение
- * @return корректно введенное число
+ * @brief Разделить элементы с четными индексами на первый элемент
+ * @param arr массив для обработки (изменяется)
  */
-int getValidIntInput(const string& prompt, int minValue = 0) {
-    int value;
-    while (true) {
-        cout << prompt;
-        cin >> value;
-        if (cin.fail() || value < minValue) {
-            cout << "Ошибка! Введите целое число >= " << minValue << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        } else {
-            break;
-        }
+void divideEvenIndexElementsByFirst(int arr[]) {
+    if (arr[0] == 0) {
+        cout << "Ошибка: первый элемент равен 0, деление невозможно!" << endl;
+        return;
     }
-    return value;
-}
-
-/**
- * @brief Функция для безопасного ввода числа с плавающей точкой с проверкой
- * @param prompt приглашение для ввода
- * @param minValue минимальное допустимое значение
- * @return корректно введенное число
- */
-double getValidDoubleInput(const string& prompt, double minValue = 0.0) {
-    double value;
-    while (true) {
-        cout << prompt;
-        cin >> value;
-        if (cin.fail() || value <= minValue) {
-            cout << "Ошибка! Введите число > " << minValue << endl;
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        } else {
-            break;
-        }
+    
+    for (int i = 0; i < SIZE; i += 2) { // Индексы 0, 2, 4, 6...
+        arr[i] /= arr[0]; // Целочисленное деление
     }
-    return value;
 }
 
 /**
@@ -101,22 +96,59 @@ double getValidDoubleInput(const string& prompt, double minValue = 0.0) {
  * @return 0 при успешном выполнении
  */
 int main() {
-    cout << "Программа для работы с последовательностью:" << endl;
-    cout << "∑[k=0..n] ((-1)^k)/k!" << endl << endl;
+    int arr[SIZE];
+    int choice;
+    int A;
     
-    // Часть a: Сумма первых n членов
-    cout << "Часть a: Сумма первых n членов последовательности" << endl;
-    int n = getValidIntInput("Введите количество членов последовательности (n >= 0): ");
-    double sumN = sumFirstNTerms(n);
-    cout << "Сумма первых " << n << " членов последовательности: " 
-         << fixed << setprecision(10) << sumN << endl << endl;
+    cout << "Программа работы с массивом из " << SIZE << " элементов" << endl;
+    cout << "Диапазон значений: [-10; 20]" << endl;
+    cout << "==================================" << endl;
     
-    // Часть b: Сумма членов, не меньших по модулю e
-    cout << "Часть b: Сумма членов последовательности, не меньших по модулю e" << endl;
-    double e = getValidDoubleInput("Введите минимальное значение e (e > 0): ");
-    double sumE = sumTermsAboveE(e);
-    cout << "Сумма членов последовательности с |a_k| >= " << e << ": " 
-         << fixed << setprecision(10) << sumE << endl;
+    // Выбор способа заполнения массива
+    cout << "Выберите способ заполнения массива:" << endl;
+    cout << "1 - Случайными числами" << endl;
+    cout << "2 - Вручную с клавиатуры" << endl;
+    cout << "Ваш выбор: ";
+    
+    while (!(cin >> choice) || (choice != 1 && choice != 2)) {
+        cout << "Ошибка! Введите 1 или 2: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    
+    if (choice == 1) {
+        fillArrayRandom(arr);
+    } else {
+        fillArrayManual(arr);
+    }
+    
+    // Вывод исходного массива
+    printArray(arr, "Исходный массив");
+    
+    // Задание 1: Сумма элементов с нечетными индексами
+    int sumOdd = sumOddIndexElements(arr);
+    cout << "1. Сумма элементов с нечетными индексами: " << sumOdd << endl;
+    
+    // Задание 2: Подсчет элементов > A и кратных 5
+    cout << "Введите число A для сравнения: ";
+    while (!(cin >> A)) {
+        cout << "Ошибка! Введите целое число: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    
+    int count = countElementsGreaterThanAAndMultipleOf5(arr, A);
+    cout << "2. Количество элементов > " << A << " и кратных 5: " << count << endl;
+    
+    // Задание 3: Деление элементов с четными индексами на первый элемент
+    cout << "3. Деление элементов с четными индексами на первый элемент:" << endl;
+    int tempArr[SIZE]; // Создаем копию для демонстрации
+    for (int i = 0; i < SIZE; i++) {
+        tempArr[i] = arr[i];
+    }
+    
+    divideEvenIndexElementsByFirst(tempArr);
+    printArray(tempArr, "Массив после деления");
     
     return 0;
 }
