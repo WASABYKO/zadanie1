@@ -51,9 +51,6 @@ double getA(const double x, const double y)
 
 double getB(const double x, const double y)
 {
-    // Формула: b = x(sin²x + cos²y)
-    // Используем тригонометрическое тождество: sin²x + cos²y
-    // Но по заданию, вероятно, имеется в виду: x * (sin²x + cos²y)
-    
-    
+    double result = x * (sin(x) * sin(x) + cos(y) * cos(y);
+    return result;
 }
