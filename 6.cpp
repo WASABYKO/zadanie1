@@ -2,153 +2,239 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+#include <algorithm> 
+
 using namespace std;
-
-const int SIZE = 7; // Размер массива
-
 /**
- * @brief Заполнение массива случайными числами в диапазоне [-10; 20]
- * @param arr массив для заполнения
+ * @enum FM
+ * @brief Режимы заполнения массива.
+ * Используется для выбора способа заполнения массива:
+ * - RANDOM — заполнение случайными числами
+ * - MANUAL — заполнение вручную пользователем.
  */
-void fillArrayRandom(int arr[]) {
-    srand(time(0)); // Инициализация генератора случайных чисел
-    for (int i = 0; i < SIZE; i++) {
-        arr[i] = rand() % 31 - 10; // [-10; 20]
-    }
-}
+enum FM {
+    RANDOM = 1,
+    MANUAL = 2
+};
 
 /**
- * @brief Заполнение массива вручную с клавиатуры
- * @param arr массив для заполнения
+ * @brief Заполняет двумерный массив случайными числами в заданном диапазоне
+ * @param arr - массив для заполнения
+ * @param rows - количество строк
+ * @param cols - количество столбцов
+ * @param min - минимальное значение
+ * @param max - максимальное значение
  */
-void fillArrayManual(int arr[]) {
-    cout << "Введите " << SIZE << " целых чисел:" << endl;
-    for (int i = 0; i < SIZE; i++) {
-        cout << "Элемент [" << i << "]: ";
-        while (!(cin >> arr[i])) {
-            cout << "Ошибка! Введите целое число: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-    }
-}
+void fillRandom(int** arr, const size_t rows, const size_t cols, const int min, const int max);
 
 /**
- * @brief Вывод массива на экран
- * @param arr массив для вывода
- * @param title заголовок для вывода
+ * @brief Вычисляет сумму элементов первых трех столбцов, заменяя их на квадраты
+ * @param arr - массив чисел
+ * @param rows - количество строк
+ * @param cols - количество столбцов
  */
-void printArray(const int arr[], const string& title) {
-    cout << title << ": [";
-    for (int i = 0; i < SIZE; i++) {
-        cout << arr[i];
-        if (i < SIZE - 1) cout << ", ";
-    }
-    cout << "]" << endl;
-}
+void processFirstThreeColumns(int** arr, const size_t rows, const size_t cols);
 
 /**
- * @brief Найти сумму элементов с нечетными индексами
- * @param arr массив для обработки
- * @return сумма элементов с нечетными индексами
+ * @brief Вставляет первую строку после каждой нечетной строки
+ * @param arr - массив чисел
+ * @param rows - количество строк (будет изменено)
+ * @param cols - количество столбцов
+ * @param newRows - новое количество строк (выходной параметр)
  */
-int sumOddIndexElements(const int arr[]) {
-    int sum = 0;
-    for (int i = 1; i < SIZE; i += 2) { // Индексы 1, 3, 5...
-        sum += arr[i];
-    }
-    return sum;
-}
+int** insertFirstRowAfterOddRows(int** arr, const size_t rows, const size_t cols, const size_t newRows);
 
 /**
- * @brief Подсчет элементов > A и кратных 5
- * @param arr массив для обработки
- * @param A заданное число для сравнения
- * @return количество элементов, удовлетворяющих условиям
+ * @brief Выводит двумерный массив на экран
+ * @param arr - массив чисел
+ * @param rows - количество строк
+ * @param cols - количество столбцов
  */
-int countElementsGreaterThanAAndMultipleOf5(const int arr[], int A) {
-    int count = 0;
-    for (int i = 0; i < SIZE; i++) {
-        if (arr[i] > A && arr[i] % 5 == 0) {
-            count++;
-        }
-    }
-    return count;
-}
+void printArray(int** arr, const size_t rows, const size_t cols);
 
 /**
- * @brief Разделить элементы с четными индексами на первый элемент
- * @param arr массив для обработки (изменяется)
+ * @brief Безопасный ввод числа с проверкой
+ * @param message - сообщение для пользователя
+ * @return - возвращает введенное число
  */
-void divideEvenIndexElementsByFirst(int arr[]) {
-    if (arr[0] == 0) {
-        cout << "Ошибка: первый элемент равен 0, деление невозможно!" << endl;
-        return;
-    }
-    
-    for (int i = 0; i < SIZE; i += 2) { // Индексы 0, 2, 4, 6...
-        arr[i] /= arr[0]; // Целочисленное деление
-    }
-}
+int safeInput(const string& message);
 
 /**
- * @brief Главная функция программы
- * @return 0 при успешном выполнении
+ * @brief Копирует двумерный массив
+ * @param src - исходный массив для копирования
+ * @param rows - количество строк в массиве
+ * @param cols - количество столбцов в массиве
+ * @return Возвращает указатель на новый массив, являющийся копией исходного
+ */
+int** copyArray(int** src, const size_t rows, const size_t cols);
+
+/**
+ * @brief Безопасный ввод положительного числа с проверкой
+ * @param message - сообщение для пользователя при вводе
+ * @return Возвращает введенное положительное число
+ */
+size_t safeInputPositive(const string& message);
+
+/**
+ * @brief точка входа в программу
+ * @return 0, если программа выполнена корректно, иначе 1 
  */
 int main() {
-    int arr[SIZE];
-    int choice;
-    int A;
+    srand(time(0));
     
-    cout << "Программа работы с массивом из " << SIZE << " элементов" << endl;
-    cout << "Диапазон значений: [-10; 20]" << endl;
-    cout << "==================================" << endl;
+    // Ввод диапазона
+    int min_val = safeInput("Введите минимальное значение диапазона: ");
+    int max_val = safeInput("Введите максимальное значение диапазона: ");
     
-    // Выбор способа заполнения массива
-    cout << "Выберите способ заполнения массива:" << endl;
-    cout << "1 - Случайными числами" << endl;
-    cout << "2 - Вручную с клавиатуры" << endl;
-    cout << "Ваш выбор: ";
-    
-    while (!(cin >> choice) || (choice != 1 && choice != 2)) {
-        cout << "Ошибка! Введите 1 или 2: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    if(min_val > max_val) {
+        cout << "Минимальное значение больше максимального. Значения будут поменяны местами." << endl;
+        swap(min_val, max_val);
     }
     
-    if (choice == 1) {
-        fillArrayRandom(arr);
-    } else {
-        fillArrayManual(arr);
+    // Используем новую функцию для ввода положительных значений
+    size_t rows = safeInputPositive("Введите количество строк: ");
+    size_t cols = safeInputPositive("Введите количество столбцов: ");
+    
+    // Создание массива
+    int** arr = new int*[rows];
+    for(size_t i = 0; i < rows; i++) {
+        arr[i] = new int[cols];
     }
     
-    // Вывод исходного массива
-    printArray(arr, "Исходный массив");
+    // Заполнение массива
+    cout << "Заполнить массив: " << FM::RANDOM << " - Случайными числами, " << FM::MANUAL << " - Вручную. Выберите вариант: ";
+    int choice = safeInput("");
     
-    // Задание 1: Сумма элементов с нечетными индексами
-    int sumOdd = sumOddIndexElements(arr);
-    cout << "1. Сумма элементов с нечетными индексами: " << sumOdd << endl;
-    
-    // Задание 2: Подсчет элементов > A и кратных 5
-    cout << "Введите число A для сравнения: ";
-    while (!(cin >> A)) {
-        cout << "Ошибка! Введите целое число: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    switch(FM(choice)) {
+        case FM::RANDOM:
+            fillRandom(arr, rows, cols, min_val, max_val);
+            break;
+        case FM::MANUAL:
+            cout << "Введите " << rows << "x" << cols << " элементов массива:" << endl;
+            for(size_t i = 0; i < rows; i++) {
+                for(size_t j = 0; j < cols; j++) {
+                    arr[i][j] = safeInput("Элемент [" + to_string(i) + "][" + to_string(j) + "]: ");
+                }
+            }
+            break;
+        default:
+            cout << "Неверное значение" << endl;
+            return 1;
+             delete [] arr;
     }
     
-    int count = countElementsGreaterThanAAndMultipleOf5(arr, A);
-    cout << "2. Количество элементов > " << A << " и кратных 5: " << count << endl;
+    cout << "Исходный массив:" << endl;
+    printArray(arr, rows, cols);
     
-    // Задание 3: Деление элементов с четными индексами на первый элемент
-    cout << "3. Деление элементов с четными индексами на первый элемент:" << endl;
-    int tempArr[SIZE]; // Создаем копию для демонстрации
-    for (int i = 0; i < SIZE; i++) {
-        tempArr[i] = arr[i];
-    }
+    // Создаем копию массива для работы
+    int** workArr = copyArray(arr, rows, cols);
+size_t workRows = rows;
     
-    divideEvenIndexElementsByFirst(tempArr);
-    printArray(tempArr, "Массив после деления");
+    // 1. Замена элементов первых трех столбцов на их квадраты
+    processFirstThreeColumns(workArr, workRows, cols);
+    cout << "1. Массив после замены первых трех столбцов на их квадраты:" << endl;
+    printArray(workArr, workRows, cols);
     
+    // 2. Вставка первой строки после каждой нечетной строки
+    size_t newRows = rows + (rows + 1) / 2;
+    int** newArr = insertFirstRowAfterOddRows(workArr, workRows, cols, newRows);
+
+    
+    cout << "2. Массив после вставки первой строки после каждой нечетной строки:" << endl;
+    printArray(newArr , newRows, cols);
+    delete [] newArr;
+    delete [] workArr; 
+    delete [] arr;
     return 0;
+}
+
+size_t safeInputPositive(const string& message) {
+    int value = 0;
+    cout << message;
+    cin >> value;
+    if(cin.fail() || value < 0) {
+        cout << "Ошибка ввода. Пожалуйста, введите целое число.";
+        abort();
+    } 
+    return value;
+}
+
+
+void fillRandom(int** arr, const size_t rows, const size_t cols, const int min, const int max) {
+    for(size_t i = 0; i < rows; i++) {
+        for(size_t j = 0; j < cols; j++) {
+            arr[i][j] = rand() % (max - min + 1) + min;
+        }
+    }
+}
+
+
+void processFirstThreeColumns(int** arr, const size_t rows, const size_t cols) {
+    size_t columnsToProcess = min(cols, static_cast<size_t>(3));
+    for(size_t i = 0; i < rows; i++) {
+        for(size_t j = 0; j < columnsToProcess; j++) {
+            arr[i][j] = arr[i][j] * arr[i][j];
+        }
+    }
+}
+
+int** insertFirstRowAfterOddRows(int** arr, const size_t rows, const size_t cols, const size_t newRows){
+    int** newArr = new int*[newRows];
+    
+    int* firstRow = new int[cols];
+    for(size_t j = 0; j < cols; j++) {
+        firstRow[j] = arr[0][j];
+    }
+    
+    size_t newIndex = 0;
+    for(size_t i = 0; i < rows; i++) {
+        newArr[newIndex] = new int[cols];
+        for(size_t j = 0; j < cols; j++) {
+            newArr[newIndex][j] = arr[i][j];
+        }
+        newIndex++;
+        
+        if(i % 2 == 0) {
+            newArr[newIndex] = new int[cols];
+            for(size_t j = 0; j < cols; j++) {
+                newArr[newIndex][j] = firstRow[j];
+            }
+            newIndex++;
+        }
+    }
+    
+    delete[] firstRow;
+    return newArr;
+}
+
+void printArray(int** arr, const size_t rows, const size_t cols) {
+    for(size_t i = 0; i < rows; i++) {
+        for(size_t j = 0; j < cols; j++) {
+            cout << arr[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int safeInput(const string& message) {
+    int value = 0;
+    cout << message;
+    cin >> value;
+    if(cin.fail()) {
+        cout << "Ошибка ввода. Пожалуйста, введите целое число.";
+        abort();
+    } 
+    return value;
+}
+
+
+int** copyArray(int** src, const size_t rows, const size_t cols) {
+    int** dest = new int*[rows];
+    for(size_t i = 0; i < rows; i++) {
+        dest[i] = new int[cols];
+        for(size_t j = 0; j < cols; j++) {
+            dest[i][j] = src[i][j];
+        }
+    }
+    return dest;
 }
