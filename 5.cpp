@@ -2,153 +2,182 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
+#include <algorithm> // для swap
+
 using namespace std;
 
-const int SIZE = 7; // Размер массива
+/**
+ * @enum FM
+ * @brief Режимы заполнения массива.
+ * 
+ * Используется для выбора способа заполнения массива:
+ * - RANDOM — заполнение случайными числами,
+ * - MANUAL — заполнение вручную пользователем.
+ */
+
+enum FM {
+    RANDOM=1,
+    MANUAL=2
+};
 
 /**
- * @brief Заполнение массива случайными числами в диапазоне [-10; 20]
- * @param arr массив для заполнения
+ * @brief - Заполняет массив случайными числами в заданном диапазоне
+ * @param arr - массив для заполнения
+ * @param n - размер массива
+ * @param min - минимальное значение
+ * @param max - максимальное значение
  */
-void fillArrayRandom(int arr[]) {
-    srand(time(0)); // Инициализация генератора случайных чисел
-    for (int i = 0; i < SIZE; i++) {
-        arr[i] = rand() % 31 - 10; // [-10; 20]
+void fillRandom(int* arr, const size_t n, const int min, const int max);
+
+/**
+ * @brief - Вычисляет сумму элементов с нечетными индексами
+ * @param arr - массив чисел
+ * @param n - размер массива
+ * @return - возвращает сумму элементов
+ */
+int sumOddIndexes(const int* arr, const size_t n);
+
+/**
+ * @brief - Подсчитывает элементы больше A и кратные 5
+ * @param arr - массив чисел
+ * @param n - размер массива
+ * @param A - заданное число для сравнения
+ * @return - возвращает количество элементов
+ */
+int countElements(const int* arr, const size_t n, const int A);
+
+/**
+ * @brief - Делит элементы с четными номерами на первый элемент
+ * @param arr - массив чисел
+ * @param n - размер массива
+ */
+void divideEvenNumbered(int* arr, const size_t n);
+
+/**
+ * @brief - Выводит массив на экран
+ * @param arr - массив чисел
+ * @param n - размер массива
+ */
+void printArray(const int* arr, const size_t n);
+
+/**
+ * @brief - Безопасный ввод числа с проверкой
+ * @param message - сообщение для пользователя
+ * @return - возвращает введенное число
+ */
+int safeInput(const string& message);
+
+/**
+ * @brief точка входа в программу
+ * @return 0, если прогамма выполнена корректно, иначе 1 
+ */
+
+int main() {
+    srand(time(0));
+    
+    // Ввод диапазона
+    int min_val = safeInput("Введите минимальное значение диапазона: ");
+
+    int max_val = safeInput("Введите максимальное значение диапазона: ");
+    
+    if(min_val > max_val) {
+        cout << "Минимальное значение больше максимального.";
+        swap(min_val, max_val);
     }
-}
+    
+    size_t n = safeInput("Введите размер массива: ");
+    int* arr = new int[n];
+    int* work_arr = new int[n];
+    
+   // Заполнение массива
+cout << "Заполнить массив: " << (FM::RANDOM) << " - Случайными числами " << (FM::MANUAL) << " - Вручную" << " Выберите вариант: "<<endl;
+int choice = safeInput("");
 
-/**
- * @brief Заполнение массива вручную с клавиатуры
- * @param arr массив для заполнения
- */
-void fillArrayManual(int arr[]) {
-    cout << "Введите " << SIZE << " целых чисел:" << endl;
-    for (int i = 0; i < SIZE; i++) {
-        cout << "Элемент [" << i << "]: ";
-        while (!(cin >> arr[i])) {
-            cout << "Ошибка! Введите целое число: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+switch(FM(choice)) {
+    case FM::RANDOM:
+        fillRandom(arr, n, min_val, max_val);
+        break;
+    case FM::MANUAL:
+        cout << "Введите " << n << " элементов массива:\n";
+        for(size_t i = 0; i < n; i++) {
+            arr[i] = safeInput("Элемент " + to_string(i) + ": ");
         }
+        break;
+    default:
+        cout << "Неверное значение" << endl;
+        return 1;
+        delete [] arr;
+}
+    copy(arr, arr + n, work_arr);
+    
+    cout << "Исходный массив: ";
+    printArray(arr, n);
+     
+    cout << "1. Сумма элементов с нечетными индексами: " 
+         << sumOddIndexes(work_arr, n) << endl;
+ 
+    int A = safeInput("Введите число A: ");
+    cout << "2. Количество элементов > " << A << " и кратных 5: " 
+         << countElements(work_arr, n, A) << endl;
+ 
+    if(work_arr[0] != 0) {
+        divideEvenNumbered(work_arr, n);
+        cout << "3. Массив после деления элементов с четными номерами: ";
+        printArray(work_arr, n);
+    } else {
+        cout << "3. Ошибка: первый элемент равен 0, деление невозможно";
+        abort();
+    }
+    return 0;
+    delete [] arr;
+    delete [] work_arr;
+}
+
+void fillRandom(int* arr, const size_t n, const int min, const int max) {
+    for(size_t i = 0; i < n; i++) {
+        arr[i] = rand() % (max - min + 1) + min;
     }
 }
 
-/**
- * @brief Вывод массива на экран
- * @param arr массив для вывода
- * @param title заголовок для вывода
- */
-void printArray(const int arr[], const string& title) {
-    cout << title << ": [";
-    for (int i = 0; i < SIZE; i++) {
-        cout << arr[i];
-        if (i < SIZE - 1) cout << ", ";
-    }
-    cout << "]" << endl;
-}
-
-/**
- * @brief Найти сумму элементов с нечетными индексами
- * @param arr массив для обработки
- * @return сумма элементов с нечетными индексами
- */
-int sumOddIndexElements(const int arr[]) {
+int sumOddIndexes(const int* arr, const size_t n){
     int sum = 0;
-    for (int i = 1; i < SIZE; i += 2) { // Индексы 1, 3, 5...
+    for(size_t i = 1; i < n; i += 2) {
         sum += arr[i];
     }
     return sum;
 }
 
-/**
- * @brief Подсчет элементов > A и кратных 5
- * @param arr массив для обработки
- * @param A заданное число для сравнения
- * @return количество элементов, удовлетворяющих условиям
- */
-int countElementsGreaterThanAAndMultipleOf5(const int arr[], int A) {
+int countElements(const int* arr, const size_t n, const int A) {
     int count = 0;
-    for (int i = 0; i < SIZE; i++) {
-        if (arr[i] > A && arr[i] % 5 == 0) {
+    for(size_t i = 0; i < n; i++) {
+        if(arr[i] > A && arr[i] % 5 == 0) {
             count++;
         }
     }
     return count;
 }
 
-/**
- * @brief Разделить элементы с четными индексами на первый элемент
- * @param arr массив для обработки (изменяется)
- */
-void divideEvenIndexElementsByFirst(int arr[]) {
-    if (arr[0] == 0) {
-        cout << "Ошибка: первый элемент равен 0, деление невозможно!" << endl;
-        return;
-    }
-    
-    for (int i = 0; i < SIZE; i += 2) { // Индексы 0, 2, 4, 6...
-        arr[i] /= arr[0]; // Целочисленное деление
+void divideEvenNumbered(int* arr, const size_t n) {
+    int first = arr[0];
+for(size_t i = 1; i < n; i += 2) {
+        arr[i] /= first;
     }
 }
 
-/**
- * @brief Главная функция программы
- * @return 0 при успешном выполнении
- */
-int main() {
-    int arr[SIZE];
-    int choice;
-    int A;
-    
-    cout << "Программа работы с массивом из " << SIZE << " элементов" << endl;
-    cout << "Диапазон значений: [-10; 20]" << endl;
-    cout << "==================================" << endl;
-    
-    // Выбор способа заполнения массива
-    cout << "Выберите способ заполнения массива:" << endl;
-    cout << "1 - Случайными числами" << endl;
-    cout << "2 - Вручную с клавиатуры" << endl;
-    cout << "Ваш выбор: ";
-    
-    while (!(cin >> choice) || (choice != 1 && choice != 2)) {
-        cout << "Ошибка! Введите 1 или 2: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+void printArray(const int* arr, const size_t n) {
+    for(size_t i = 0; i < n; i++) {
+        cout << arr[i] << " ";
     }
-    
-    if (choice == 1) {
-        fillArrayRandom(arr);
-    } else {
-        fillArrayManual(arr);
-    }
-    
-    // Вывод исходного массива
-    printArray(arr, "Исходный массив");
-    
-    // Задание 1: Сумма элементов с нечетными индексами
-    int sumOdd = sumOddIndexElements(arr);
-    cout << "1. Сумма элементов с нечетными индексами: " << sumOdd << endl;
-    
-    // Задание 2: Подсчет элементов > A и кратных 5
-    cout << "Введите число A для сравнения: ";
-    while (!(cin >> A)) {
-        cout << "Ошибка! Введите целое число: ";
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-    
-    int count = countElementsGreaterThanAAndMultipleOf5(arr, A);
-    cout << "2. Количество элементов > " << A << " и кратных 5: " << count << endl;
-    
-    // Задание 3: Деление элементов с четными индексами на первый элемент
-    cout << "3. Деление элементов с четными индексами на первый элемент:" << endl;
-    int tempArr[SIZE]; // Создаем копию для демонстрации
-    for (int i = 0; i < SIZE; i++) {
-        tempArr[i] = arr[i];
-    }
-    
-    divideEvenIndexElementsByFirst(tempArr);
-    printArray(tempArr, "Массив после деления");
-    
-    return 0;
+    cout << endl;
 }
+
+int safeInput(const string& message) {
+    int value = 0;
+    cout << message;
+    cin >> value;
+    if(cin.fail()) {
+    cout << "Ошибка ввода. Пожалуйста, введите целое число.";
+    abort();
+        } 
+    return value;
+    }
