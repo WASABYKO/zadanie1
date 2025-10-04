@@ -1,56 +1,38 @@
-#include <iostream>
+#include <iostream> 
 #include <cmath>
+#define _use_math_defines //for c++
+
 using namespace std;
-
 /**
- * @brief Функция для вычисления значения a по заданной формуле
- * @param x - значение переменной x
- * @param y - значение переменной y
- * @return возвращает рассчитанное значение a
- */
+*@brief - Функция для вычисления А по заданному уравнению
+*@param х - значение переменной х
+*@param у - значение переменной у
+*@return- возвращает рассчитанное значение
+*/
 double getA(const double x, const double y);
-
 /**
- * @brief Функция для вычисления значения b по заданной формуле
- * @param x - значение переменной x
- * @param y - значение переменной y
- * @return возвращает рассчитанное значение b
- */
+*@brief - Функция для вычисления А по заданному уравнению
+*@param х - значение переменной х
+*@param у - значение переменной у
+*@return- возвращает рассчитанное значение
+*/
 double getB(const double x, const double y);
-
 /**
- * @brief Точка входа в программу
- * @return возвращает 0, если программа выполнена корректно
- */
-int main()
-{
-    const double x = 0.335;
-    const double y = 0.025;
-    
-    cout << "Исходные данные:" << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
-    cout << endl;
-    cout << "Результаты вычислений:" << endl;
-    cout << "a = " << getA(x, y) << endl;
-    cout << "b = " << getB(x, y) << endl;
-    
+*@brief - Точко входа в программу
+*@return - возвращает 0, если программа выполнена корректно 
+*/
+int main() {
+    const double x = 0.335; 
+    const double y = 0.025; 
+    cout << "a = " << getA(x,y) << endl; 
+    cout << "b = " << getB(x,y); 
     return 0;
 }
-
 double getA(const double x, const double y)
 {
-    // Формула: a = 1 + x + (x² + x³ + x⁴)/10 + 21
-    double x2 = x * x;        // x²
-    double x3 = x2 * x;       // x³
-    double x4 = x3 * x;       // x⁴
-    
-    double result = 1 + x + (x2 + x3 + x4) / 10.0 + 21;
-    return result;
+    return(1 + x + ((pow(x, 2)) / 2) + ((pow(x, 3)) / 3) + ((pow(x, 4)) / 4));
 }
-
 double getB(const double x, const double y)
 {
-    double result = x * (sin(x) * sin(x) + cos(y) * cos(y);
-    return result;
+    return(x * (sin(pow(x, 3)) + pow(cos(y), 2)));
 }
