@@ -18,7 +18,7 @@ double getA(const double x, const double y);
 */
 double getB(const double x, const double y);
 /**
-*@brief - Точко входа в программу
+*@brief - Точка входа в программу
 *@return - возвращает 0, если программа выполнена корректно 
 */
 int main() {
